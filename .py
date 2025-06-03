@@ -1,45 +1,65 @@
+# graficos_games.py
+
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
+def carregar_dados():
+    # Carrega o dataset CSV
+    url = 'https://zenodo.org/record/5898311/files/vgsales.csv'
+    return pd.read_csv(url)
 
-df = pd.read_csv('vgsales.csv')
+def grafico_vendas_por_ano(df):
+    # Agrupa as vendas globais por ano
+    vendas_ano = df.groupby('Year')['Global_Sales'].sum().reset_index()
+    vendas_ano = vendas_ano[vendas_ano['Year'].notna()]
 
-# Contar o número de jogos por gênero
-genre_counts = df['Genre'].value_counts()
+    # Plota o gráfico
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x='Year', y='Global_Sales', data=vendas_ano, marker='o', color='b')
+    plt.title('Vendas Globais de Videogames por Ano')
+    plt.xlabel('Ano')
+    plt.ylabel('Vendas Globais (milhões)')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
 
-# Gráfico 1 - Distribuição de Vendas por Gênero
-plt.figure(figsize=(10, 6))
-genre_counts.plot(kind='bar', color='skyblue')
-plt.title('Número de Jogos por Gênero')
-plt.xlabel('Gênero')
-plt.ylabel('Quantidade de Jogos')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
+def grafico_vendas_por_genero(df):
+    # Agrupa as vendas globais por gênero
+    vendas_genero = df.groupby('Genre')['Global_Sales'].sum().reset_index()
+    vendas_genero = vendas_genero[vendas_genero['Global_Sales'] > 0]
 
+    # Plota o gráfico
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='Global_Sales', y='Genre', data=vendas_genero, palette='viridis')
+    plt.title('Vendas Globais por Gênero de Jogo')
+    plt.xlabel('Vendas Globais (milhões)')
+    plt.ylabel('Gênero')
+    plt.tight_layout()
+    plt.show()
 
-# Agrupar por plataforma e somar as vendas globais
-platform_sales = df.groupby('Platform')['Global_Sales'].sum().sort_values(ascending=False)
+def grafico_vendas_por_plataforma(df):
+    # Agrupa as vendas globais por plataforma
+    vendas_plataforma = df.groupby('Platform')['Global_Sales'].sum().reset_index()
+    vendas_plataforma = vendas_plataforma[vendas_plataforma['Global_Sales'] > 0]
 
-# Gráfico 2 - Vendas Globais por Plataforma
-plt.figure(figsize=(10, 6))
-platform_sales.plot(kind='bar', color='lightgreen')
-plt.title('Vendas Globais por Plataforma')
-plt.xlabel('Plataforma')
-plt.ylabel('Vendas Globais (milhões)')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
+    # Plota o gráfico
+    plt.figure(figsize=(12, 6))
+    sns.barplot(x='Global_Sales', y='Platform', data=vendas_plataforma, palette='magma')
+    plt.title('Vendas Globais por Plataforma')
+    plt.xlabel('Vendas Globais (milhões)')
+    plt.ylabel('Plataforma')
+    plt.tight_layout()
+    plt.show()
 
+def main():
+    # Carrega os dados
+    df = carregar_dados()
 
-# Contar o número de lançamentos por ano
-yearly_releases = df['Year'].value_counts().sort_index()
+    # Chama as funções para gerar os gráficos
+    grafico_vendas_por_ano(df)
+    grafico_vendas_por_genero(df)
+    grafico_vendas_por_plataforma(df)
 
-# Gráfico 3 - Tendência de Lançamentos ao Longo dos Anos
-plt.figure(figsize=(10, 6))
-yearly_releases.plot(kind='line', marker='o', color='coral')
-plt.title('Número de Lançamentos de Jogos por Ano')
-plt.xlabel('Ano')
-plt.ylabel('Número de Lançamentos')
-plt.tight_layout()
-plt.show()
+if __name__ == "__main__":
+    main()
